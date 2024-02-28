@@ -17,16 +17,21 @@ app.listen(port, () => {
 app.get("/", (req, res) => {
   res
     // .cookie("test", "testing") //if same site not specified  it will be treated as lax by default
+    // Cookies with SameSite=Strict are only sent in a first-party context.
     .cookie("test", "testing", {
       httpOnly: true,
       sameSite: "strict",
       secure: true,
     })
+    // //Cookies with SameSite=Lax are sent with top-level navigation GET requests initiated by third-party websites.
+    // //They are not sent with requests initiated by third-party websites via methods like POST.
+
     // .cookie("test", "testing", {
     //   httpOnly: true,
     //   sameSite: "lax",
     //   secure: true,
     // })
+    // // Cookies with SameSite=None are sent along with both first-party and third-party requests.
     // .cookie("test", "testing", {
     //   httpOnly: true,
     //   sameSite: "none",
@@ -35,6 +40,7 @@ app.get("/", (req, res) => {
     .send("hello world");
 });
 app.get("/test", (req, res) => {
+  //access cookies from req
   console.log(req.cookies.test);
   res.send(`Hello World ${req.cookies.test}`);
 });
@@ -70,8 +76,16 @@ app.post("/login", (req, res) => {
       expiresIn: "10m",
     }
   );
-  res.cookie("accessToken", accessToken, { httpOnly: true });
-  res.cookie("refreshToken", refreshToken, { httpOnly: true });
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: true,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: true,
+  });
   return res.status(200).json({ Logedin: true });
 });
 
@@ -93,6 +107,10 @@ app.post("/refresh", (req, res) => {
   const accessToken = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_KEY, {
     expiresIn: "2m",
   });
-  res.cookie("accessToken", accessToken, { httpOnly: true });
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: true,
+  });
   return res.status(200).json({ success: true, accessToken });
 });
