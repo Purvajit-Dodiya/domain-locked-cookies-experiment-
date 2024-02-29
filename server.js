@@ -4,14 +4,42 @@ import { config } from "dotenv";
 import { user } from "./db.js";
 import jwt from "jsonwebtoken";
 import { isAuthenticated, verifyRefresh } from "./helper.js";
-
+import cors from "cors";
 const app = express();
+
+const whitelist = ["http://localhost:5173"];
+const corsOptions = {
+  credentials: true,
+  origin: (origin, callback) => {
+    if (whitelist.includes(origin)) {
+      console.log("from:", origin);
+      return callback(null, true);
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+};
+app.use(cors(corsOptions));
+
+// app.use(cors());
 config();
 app.use(cookieParser());
 app.use(express.json());
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
   console.log(`listining at ${port}`);
+});
+
+app.get("/create", (req, res) => {
+  console.log("creating a new user");
+  res.cookie("test", "cookie_testing", { httpOnly: true, sameSite: "strict" });
+  res.send("done");
+});
+app.get("/delete", (req, res) => {
+  console.log("deleting the test cookie");
+  console.log("recieved cookie", req.cookies.test);
+  res.clearCookie("test");
+  res.send("done");
 });
 
 app.get("/", (req, res) => {
@@ -21,7 +49,7 @@ app.get("/", (req, res) => {
     .cookie("test", "testing", {
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      // secure: true, // may have issues on local host
     })
     // //Cookies with SameSite=Lax are sent with top-level navigation GET requests initiated by third-party websites.
     // //They are not sent with requests initiated by third-party websites via methods like POST.
@@ -29,13 +57,11 @@ app.get("/", (req, res) => {
     // .cookie("test", "testing", {
     //   httpOnly: true,
     //   sameSite: "lax",
-    //   secure: true,
     // })
     // // Cookies with SameSite=None are sent along with both first-party and third-party requests.
     // .cookie("test", "testing", {
     //   httpOnly: true,
     //   sameSite: "none",
-    //   secure: true,
     // })
     .send("hello world");
 });
