@@ -93,14 +93,14 @@ app.post("/login", (req, res) => {
     { email: email },
     process.env.ACCESS_TOKEN_KEY || "test",
     {
-      expiresIn: "2m",
+      expiresIn: process.env.ACCESS_TOKEN_KEY_DURATION,
     }
   );
   const refreshToken = jwt.sign(
     { email: email },
     process.env.REFRESH_TOKEN_KEY || "test",
     {
-      expiresIn: "10m",
+      expiresIn: process.env.REFRESH_TOKEN_KEY_DURATION,
     }
   );
   res.cookie("accessToken", accessToken, {
@@ -128,11 +128,13 @@ app.post("/refresh", (req, res) => {
   const isValid = verifyRefresh(email, refreshToken);
   if (!isValid) {
     return res
+      .clearCookie("refreshToken")
+      .clearCookie("accessToken")
       .status(401)
       .json({ success: false, error: "Invalid token,try login again" });
   }
   const accessToken = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_KEY, {
-    expiresIn: "2m",
+    expiresIn: process.env.ACCESS_TOKEN_KEY_DURATION,
   });
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -140,4 +142,11 @@ app.post("/refresh", (req, res) => {
     secure: true,
   });
   return res.status(200).json({ success: true, accessToken });
+});
+
+app.post("/logout", (req, res) => {
+  // Clear the access token cookie
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  res.status(200).json({ message: "Logged out successfully" });
 });

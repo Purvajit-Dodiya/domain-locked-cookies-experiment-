@@ -15,7 +15,9 @@ export function isAuthenticated(req, res, next) {
     req.email = decoded.email;
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, msg: error.message });
+    return res
+      .status(401)
+      .json({ success: false, msg: "auth failed", err: error });
     // console.error(error);
   }
 }
