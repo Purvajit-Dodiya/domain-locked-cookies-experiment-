@@ -7,19 +7,20 @@ import { isAuthenticated, verifyRefresh } from "./helper.js";
 import cors from "cors";
 const app = express();
 
-const whitelist = ["http://localhost:5173"];
-const corsOptions = {
-  credentials: true,
-  origin: (origin, callback) => {
-    if (whitelist.includes(origin)) {
-      console.log("from:", origin);
-      return callback(null, true);
-    }
+// const whitelist = ["http://localhost:5173"];
+// const corsOptions = {
+//   credentials: true,
+//   origin: (origin, callback) => {
+//     if (whitelist.includes(origin)) {
+//       console.log("from:", origin);
+//       return callback(null, true);
+//     }
 
-    callback(new Error("Not allowed by CORS"));
-  },
-};
-app.use(cors(corsOptions));
+//     callback(new Error("Not allowed by CORS"));
+//   },
+// };
+// app.use(cors(corsOptions));
+app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 
 // app.use(cors());
 config();
