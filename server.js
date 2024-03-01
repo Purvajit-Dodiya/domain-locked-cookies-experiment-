@@ -20,7 +20,13 @@ const app = express();
 //   },
 // };
 // app.use(cors(corsOptions));
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:5173",
+    allowedHeaders: ["Content-Type", "X-Email"],
+  })
+);
 
 // app.use(cors());
 config();
@@ -117,6 +123,7 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/protected", isAuthenticated, (req, res) => {
+  console.log("sending protected data");
   res.json({ success: true, msg: "Welcome user!!", email: req.email });
 });
 

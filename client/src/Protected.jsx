@@ -11,7 +11,14 @@ const Protected = () => {
     const fetchData = async () => {
       console.log("called fetchData");
       try {
-        const response = await axios.get("http://localhost:3000/protected");
+        const email = localStorage.getItem("email");
+        const response = await axios.get("http://localhost:3000/protected", {
+          headers: {
+            "x-email": email,
+          },
+        });
+
+        console.log("protected reponse", response.data);
         if (response.data.success) {
           setData(response.data.msg);
         } else {
